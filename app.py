@@ -6,13 +6,14 @@ import numpy as np
 from torchvision import transforms
 from PIL import Image
 import os
-import io
 import time
-from pathlib import Path
 from huggingface_hub import hf_hub_download
 
+# Fix for Streamlit config permission in container
+os.environ["HOME"] = "/tmp"
+os.makedirs("/tmp/.streamlit", exist_ok=True)
 
-# ========== Page Configuration ==========
+# Page Configuration
 st.set_page_config(
     page_title="Skin Lesion Classification",
     page_icon="🔬",
@@ -20,37 +21,35 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-
-# ========== Custom CSS ==========
+# Enhanced CSS with !important declarations
 st.markdown("""
 <style>
     .main-header {
-        font-size: 3rem;
-        color: #1f77b4;
-        text-align: center;
-        margin-bottom: 2rem;
+        font-size: 3rem !important;
+        color: #1f77b4 !important;
+        text-align: center !important;
+        margin-bottom: 2rem !important;
     }
     .prediction-box {
-        padding: 1rem;
-        border-radius: 10px;
-        border: 2px solid #1f77b4;
-        background-color: #f0f8ff;
-        margin: 1rem 0;
+        padding: 1rem !important;
+        border-radius: 10px !important;
+        border: 2px solid #1f77b4 !important;
+        background-color: #f0f8ff !important;
+        margin: 1rem 0 !important;
     }
-    .confidence-high { color: #28a745; font-weight: bold; }
-    .confidence-medium { color: #ffc107; font-weight: bold; }
-    .confidence-low { color: #dc3545; font-weight: bold; }
+    .confidence-high { color: #28a745 !important; font-weight: bold !important; }
+    .confidence-medium { color: #ffc107 !important; font-weight: bold !important; }
+    .confidence-low { color: #dc3545 !important; font-weight: bold !important; }
     .model-info {
-        background-color: #f8f9fa;
-        padding: 1rem;
-        border-radius: 5px;
-        border-left: 4px solid #17a2b8;
+        background-color: #f8f9fa !important;
+        padding: 1rem !important;
+        border-radius: 5px !important;
+        border-left: 4px solid #17a2b8 !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
-
-# ========== Utilities ==========
+# Utilities
 def download_model_if_needed(repo_id, filename):
     """Download model from Hugging Face if not present locally"""
     if not os.path.exists(filename):
@@ -69,8 +68,7 @@ def download_model_if_needed(repo_id, filename):
                 return False
     return True
 
-
-# ========== Global Variables ==========
+# Global Variables
 @st.cache_data
 def get_class_info():
     """Return class information and descriptions"""
@@ -86,16 +84,15 @@ def get_class_info():
     }
     return class_info
 
-
-# ========== Model Loading Functions ==========
+# Model Loading Functions
 @st.cache_resource
 def load_ensemble_model():
     """Load the ensemble model with caching"""
     try:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
-        # Your Hugging Face repository ID (replace with your actual username)
-        repo_id = "sranik/skin-lesion-ensemble"  # <-- Replace with your Hugging Face username
+        # Your Hugging Face repository ID - REPLACE WITH YOUR ACTUAL USERNAME
+        repo_id = "sranik/skin-lesion-ensemble"
         
         # Download models if needed
         model_files = [
@@ -155,15 +152,14 @@ def load_ensemble_model():
         st.error(f"Error loading model: {str(e)}")
         return None, None, None, None, None
 
-
 @st.cache_resource
 def load_individual_models():
     """Alternative: Load individual models separately"""
     try:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
-        # Your Hugging Face repository ID (replace with your actual username)
-        repo_id = "your-username/skin-lesion-ensemble"  # <-- Replace with your Hugging Face username
+        # Your Hugging Face repository ID - MAKE SURE THIS MATCHES
+        repo_id = "sranik/skin-lesion-ensemble"
         
         # Download models if needed
         model_files = [
@@ -202,8 +198,7 @@ def load_individual_models():
         st.error(f"Error loading individual models: {str(e)}")
         return None, None, None, None, None, None, None
 
-
-# ========== Prediction Functions ==========
+# Prediction Functions
 def predict_with_ensemble(image, model, class_names, input_size, device, model_type="complete"):
     """Make prediction with ensemble model"""
     try:
@@ -248,7 +243,6 @@ def predict_with_ensemble(image, model, class_names, input_size, device, model_t
         st.error(f"Prediction error: {str(e)}")
         return None, None, None, None
 
-
 def get_confidence_color(confidence):
     """Return CSS class based on confidence level"""
     if confidence >= 0.8:
@@ -258,8 +252,7 @@ def get_confidence_color(confidence):
     else:
         return "confidence-low"
 
-
-# ========== Main App ==========
+# Main App
 def main():
     # Header
     st.markdown('<h1 class="main-header">🔬 Skin Lesion Classification</h1>', unsafe_allow_html=True)
@@ -409,7 +402,6 @@ def main():
             <p>8 different lesion types</p>
         </div>
         """, unsafe_allow_html=True)
-
 
 if __name__ == "__main__":
     main()
